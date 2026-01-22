@@ -9,92 +9,90 @@
 *{box-sizing:border-box}
 
 body{
-  margin:0;
-  min-height:100vh;
-  background:#000 url("tlo.png") no-repeat center/cover;
-  font-family:Arial,sans-serif;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+margin:0;
+min-height:100vh;
+background:url("tlo.png") no-repeat center center fixed;
+background-size:cover;
+font-family:Arial,sans-serif;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center
 }
 
 .box{
-  width:100%;
-  max-width:520px;
-  padding:22px;
-  background:rgba(0,0,0,.82);
-  backdrop-filter:blur(6px);
-  border:1px solid rgba(255,255,255,.12);
-  text-align:center;
+width:100%;
+max-width:520px;
+padding:25px;
+background:rgba(0,0,0,.75);
+backdrop-filter:blur(5px);
+border:1px solid rgba(255,255,255,.15);
+text-align:center
 }
 
 .hidden{display:none}
-
-h1{letter-spacing:4px;font-size:26px}
-p{font-size:15px}
+h1{letter-spacing:5px}
 
 input,button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  background:#000;
-  border:1px solid #333;
-  color:#fff;
-  font-size:16px;
+width:100%;
+padding:14px;
+margin-top:10px;
+background:#000;
+border:1px solid #333;
+color:#fff;
+font-size:16px
 }
 
-button:active{transform:scale(.98)}
+button{cursor:pointer}
 button:hover{border-color:#ff3333}
 
 .timer{
-  color:#ff3333;
-  font-size:18px;
-  margin-bottom:15px;
+color:#ff3333;
+font-size:18px;
+margin-bottom:15px
 }
 
-.flash-good{background:rgba(0,90,0,.85)!important}
-.flash-bad{background:rgba(90,0,0,.85)!important}
+.good{background:#005a00!important}
+.bad{background:#5a0000!important}
+
+.link{
+color:#00ff88;
+font-weight:bold;
+text-decoration:none;
+word-break:break-all
+}
 
 .footer{
-  margin-top:30px;
-  font-size:28px;
-  opacity:.85;
-}
-
-a{
-  color:#00ff88;
-  font-weight:bold;
-  text-decoration:none;
-  font-size:18px;
+margin-top:30px;
+font-size:32px;
+opacity:.85
 }
 </style>
 </head>
 
 <body>
-
 <div class="box">
 
 <div id="expired" class="hidden">
-  <h1>OSTATNIA NOC</h1>
-  <p>DOSTĘP ZAMKNIĘTY</p>
+<h1>OSTATNIA NOC</h1>
+<p>STRONA NIEDOSTĘPNA</p>
 </div>
 
 <div id="blocked" class="hidden">
-  <h1>OSTATNIA NOC</h1>
-  <p>❌ PRZEKROCZONO LIMIT PRÓB</p>
+<h1>DOSTĘP ZABLOKOWANY</h1>
+<p>WYKORZYSTAŁEŚ WSZYSTKIE PRÓBY</p>
 </div>
 
 <div id="login">
-  <h1>OSTATNIA NOC</h1>
-  <p>Wpisz hasło</p>
-  <input id="pass" type="password" placeholder="hasło">
+<h1>OSTATNIA NOC</h1>
+<p>Wpisz hasło</p>
+<input id="pass" type="password" placeholder="hasło">
 </div>
 
 <div id="quiz" class="hidden">
-  <div class="timer" id="timer">05:00</div>
-  <div id="question"></div>
-  <div id="answers"></div>
+<div class="timer" id="timer">05:00</div>
+<div id="question"></div>
+<div id="answers"></div>
 </div>
 
 <div id="result" class="hidden"></div>
@@ -102,108 +100,116 @@ a{
 </div>
 
 <script>
-// ====== DATA WYGAŚNIĘCIA (25 STYCZNIA 2026) ======
-const DEADLINE = new Date("2026-01-25T00:00:00");
-if(new Date() >= DEADLINE){
-  document.querySelector(".box").innerHTML =
-    "<h1>OSTATNIA NOC</h1><p>DOSTĘP ZAKOŃCZONY</p>";
-  throw "";
+// ===== DATA WYGAŚNIĘCIA =====
+if(new Date()>=new Date("2026-01-25T00:00:00")){
+login.style.display="none";
+expired.classList.remove("hidden");
+throw "";
 }
 
-// ====== LIMIT PRÓB ======
-let attempts = Number(localStorage.getItem("attempts") || 0);
-if(attempts >= 3){
-  login.classList.add("hidden");
-  blocked.classList.remove("hidden");
-  throw "";
+// ===== LIMIT PRÓB =====
+let attempts=Number(localStorage.getItem("attempts")||0);
+if(attempts>=3){
+login.style.display="none";
+blocked.classList.remove("hidden");
+throw "";
 }
 
-// ====== HASŁO ======
+// ===== HASŁO =====
 pass.addEventListener("input",()=>{
-  if(pass.value.trim()==="ostatnianoc"){
-    login.classList.add("hidden");
-    quiz.classList.remove("hidden");
-    startTimer();
-    startQuiz();
-  }
+if(pass.value.trim()==="ostatnianoc"){
+login.classList.add("hidden");
+quiz.classList.remove("hidden");
+startTimer();
+startQuiz();
+}
 });
 
-// ====== PYTANIA ======
+// ===== PYTANIA =====
 const questions=[
- {q:"KIEDY POWSTAŁ STREET MEET?",a:["2025","2023","2021"],c:1},
- {q:"1/4 PRZY JAKIEJ FIRMIE?",a:["TPV","YETICO","FAURECIA"],c:1},
- {q:"GDZIE NAGRYWANO TELEDYSK DO NUTY STREETA?",a:["TRZEBISZEWO","SKWIERZYNA","GORZÓW"],c:0},
- {q:"NALOT POLICJI NA HALLOWEEN",a:["AGATA MEBLE","BIG GORZÓW","S1"],c:2},
- {q:"GDZIE NAGRYWANA OSTATNIA ROLKA?",a:["STRZELCE","TRZEBISZEWO","KOSTRZYN"],c:1},
- {q:"NO PIRO NO FUN?",a:["TAK","NIE"],c:0},
- {q:"STREET MEET BASS WALI…",a:["NAS NIE DOGONISZ","KAŻDY CO STOI","PSY WPADAJĄ"],c:0},
- {q:"ILE OSÓB NA KANALE?",a:["1500","2100","3000"],c:1},
- {q:"ZBIÓRKI DLA?",a:["PIESKÓW","DOMU DZIECKA","POTRZEBUJĄCYCH"],c:0},
- {q:"NAJWIĘKSZY SPOT GDZIE?",a:["BIG GORZÓW","AGATA","STRZELCE"],c:0}
+{q:"KIEDY POWSTAŁ STREET MEET?",a:["2025","2023","2021"],c:1},
+{q:"1/4 PRZY JAKIEJ FIRMIE?",a:["TPV","YETICO","FAURECIA"],c:1},
+{q:"GDZIE NAGRYWANO TELEDYSK DO NUTY STREETA?",a:["TRZEBISZEWO","SKWIERZYNA","GORZÓW"],c:0},
+{q:"NALOT POLICJI NA HALLOWEEN",a:["AGATA MEBLE","BIG GORZÓW","S1"],c:2},
+{q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?",
+ a:["STRZELCE KRAJEŃSKIE","TRZEBISZEWO","KOSTRZYN NAD ODRĄ"],
+ c:2},
+{q:"NO PIRO NO FUN ?",a:["TAK","NIE"],c:0},
+{q:"STREET MEET BASS WALI W CHUJ…",a:["NAS NIE DOGONISZ JUŻ","KAŻDY CO STOI TU","PSY WPADAJĄ ZAWIJAMY"],c:0},
+{q:"ILE OSÓB JEST NA KANALE NADAWCZYM?",a:["1500","2100","3000"],c:1},
+{q:"ZBIÓRKI DLA ?",a:["PIESKÓW","DOMU DZIECKA","DLA POTRZEBUJĄCYCH"],c:0},
+{q:"NAJWIĘKSZY SPOT GDZIE ?",a:["BIG GORZÓW","AGATA MEBLE","STRZELCE KRAJEŃSKIE"],c:0}
 ];
 
 questions.sort(()=>Math.random()-.5);
 
-let index=0,score=0;
+let index=0;
+let score=0;
 
-// ====== TIMER ======
-let time=300,interval;
+// ===== TIMER 5 MIN =====
+let time=300;
+let interval;
 function startTimer(){
-  interval=setInterval(()=>{
-    time--;
-    timer.innerText=
-      String(Math.floor(time/60)).padStart(2,"0")+":"+
-      String(time%60).padStart(2,"0");
-    if(time<=0) endQuiz();
-  },1000);
+interval=setInterval(()=>{
+time--;
+const m=String(Math.floor(time/60)).padStart(2,"0");
+const s=String(time%60).padStart(2,"0");
+timer.innerText=`${m}:${s}`;
+if(time<=0)endQuiz();
+},1000);
 }
 
-// ====== QUIZ ======
-function startQuiz(){showQuestion();}
+// ===== QUIZ =====
+function startQuiz(){showQuestion()}
 
 function showQuestion(){
-  if(index>=questions.length)return endQuiz();
-  const q=questions[index];
-  question.innerHTML=`<h3>${q.q}</h3>`;
-  answers.innerHTML="";
-  q.a.map((t,i)=>({t,i})).sort(()=>Math.random()-.5)
-  .forEach(o=>{
-    const b=document.createElement("button");
-    b.innerText=o.t;
-    b.onclick=()=>answer(o.i);
-    answers.appendChild(b);
-  });
+if(index>=questions.length)return endQuiz();
+const q=questions[index];
+question.innerHTML=`<h3>${q.q}</h3>`;
+answers.innerHTML="";
+q.a.map((t,i)=>({t,i}))
+.sort(()=>Math.random()-.5)
+.forEach(o=>{
+const b=document.createElement("button");
+b.innerText=o.t;
+b.onclick=()=>answer(o.i,b);
+answers.appendChild(b);
+});
 }
 
-function answer(i){
-  document.body.classList.add(i===questions[index].c?"flash-good":"flash-bad");
-  setTimeout(()=>document.body.className="",250);
-  if(i===questions[index].c)score++;
-  index++; showQuestion();
+function answer(i,btn){
+const correct=i===questions[index].c;
+btn.classList.add(correct?"good":"bad");
+if(correct)score++;
+setTimeout(()=>{
+index++;
+showQuestion();
+},600);
 }
 
-// ====== KONIEC + UKRYTY LINK ======
+// ===== KONIEC =====
 function endQuiz(){
-  clearInterval(interval);
-  localStorage.setItem("attempts",attempts+1);
-  quiz.classList.add("hidden");
-  result.classList.remove("hidden");
+clearInterval(interval);
+localStorage.setItem("attempts",attempts+1);
+quiz.classList.add("hidden");
+result.classList.remove("hidden");
 
-  if(score>=questions.length-1){
-    const a=document.createElement("a");
-    a.href=atob("aHR0cHM6Ly90Lm1lLytBSjVrcGpPNXdBczBNSUkw");
-    a.target="_blank";
-    a.innerText="ODBIERZ LINK";
-
-    result.innerHTML=
-      "<h1>OSTATNIA NOC 🏆</h1><p style='color:#00ff88'>PRZECHODZISZ DALEJ</p>";
-    result.appendChild(a);
-    result.innerHTML+= "<div class='footer'>STREET MEET</div>";
-  }else{
-    result.innerHTML="<p>❌ NIEZALICZONE</p>";
-  }
+if(score>=9){
+const encrypted="aHR0cHM6Ly90Lm1lLytBSjVrcGpPNXdBczBNV0kw";
+const link=atob(encrypted);
+result.innerHTML=`
+<h1>OSTATNIA NOC 🏆</h1>
+<p style="color:#00ff88">ZDOBYŁEŚ ${score}/10<br>PRZECHODZISZ DALEJ</p>
+<a class="link" href="${link}" target="_blank">${link}</a>
+<div class="footer">STREET MEET</div>
+`;
+}else{
+result.innerHTML=`
+<h2>${score}/10</h2>
+<p>SŁABO 😏<br>NIE WYSTARCZYŁO</p>
+`;
+}
 }
 </script>
-
 </body>
 </html>
