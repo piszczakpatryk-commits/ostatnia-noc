@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSTATNIA NOC 🥷</title>
+
+<style>
+body{
+  margin:0;
+  background:#000;
+  color:#eee;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+}
+#app{max-width:720px;margin:auto;padding:20px}
+h1{text-align:center;letter-spacing:3px}
+.timer{
+  text-align:center;
+  font-size:24px;
+  margin:15px 0;
+  color:#0f0;
+}
+.timer.danger{color:#f00}
+button{
+  width:100%;
+  padding:16px;
+  margin:10px 0;
+  background:#111;
+  border:1px solid #333;
+  color:#eee;
+  border-radius:14px;
+  font-size:16px
+}
+button.correct{background:#0a7d3b}
+button.wrong{background:#7d0a0a}
+button:disabled{opacity:.5}
+a button{background:#0a7d3b;font-weight:bold}
+</style>
+</head>
+
+<body>
+<div id="app"></div>
+
+<script>
+// ===== DATY =====
+const START = new Date("2026-01-22T00:00:00").getTime();
+const END   = new Date("2026-01-24T23:59:59").getTime();
+
+// ===== USTAWIENIA =====
+const QUIZ_TIME = 180; // 3 min
+const MAX_ATTEMPTS = 2;
+const PASSWORD = "OSTATNIANOC";
+
+// ===== BLOKADY =====
+const now = Date.now();
+if(now < START || now > END){
+  document.getElementById("app").innerHTML =
+    "<h1 style='text-align:center;margin-top:40vh'>QUIZ ZAMKNIĘTY 🛑</h1>";
+  throw "";
+}
+if(localStorage.getItem("banned")==="1"){
+  document.getElementById("app").innerHTML =
+    "<h1 style='text-align:center;margin-top:40vh'>BRAK DOSTĘPU ❌</h1>";
+  throw "";
+}
+let attempts = Number(localStorage.getItem("attempts")||0);
+if(attempts >= MAX_ATTEMPTS){
+  localStorage.setItem("banned","1");
+  document.getElementById("app").innerHTML =
+    "<h1 style='text-align:center;margin-top:40vh'>LIMIT PODEJŚĆ ❌</h1>";
+  throw "";
+}
+if(prompt("PODAJ HASŁO 🥷") !== PASSWORD){
+  document.getElementById("app").innerHTML =
+    "<h1 style='text-align:center;margin-top:40vh'>ZŁE HASŁO ❌</h1>";
+  throw "";
+}
+localStorage.setItem("attempts", attempts+1);
+
+// ===== PYTANIA =====
+const quiz = [
+ {q:"KIEDY POWSTAŁ STREET MEET?",a:["2025","2023","2021"],c:1},
+ {q:"1/4 PRZY JAKIEJ FIRMIE?",a:["TPV","YETICO","FAURECIA"],c:1},
+ {q:"GDZIE NAGRYWANO TELEDYSK DO NUTY STREETA?",a:["TRZEBISZEWO","SKWIERZYNA","NA GORZOWIE"],c:0},
+ {q:"NALOT POLICJI NA HALLOWEEN",a:["AGATA MEBLE","BIG GORZÓW","S1"],c:2},
+ {q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?",a:["STRZELCE KRAJEŃSKIE","TRZEBISZEWO","KOSTRZYN NAD ODRĄ"],c:2},
+ {q:"NO PIRO NO FUN?",a:["TAK","NIE"],c:0},
+ {q:"STREET MEET BASS WALI W CHUJ…",a:["NAS NIE DOGONISZ JUŻ","KAŻDY CO STOI TU","PSY WPADAJĄ ZAWIJAMY"],c:0},
+ {q:"ILE OSÓB JEST NA KANALE NADAWCZYM",a:["1500","2100","3000"],c:1},
+ {q:"ZBIÓRKI DLA?",a:["PIESKÓW","DOMU DZIECKA","DLA POTRZEBUJĄCYCH"],c:0},
+ {q:"NAJWIĘKSZY SPOT GDZIE?",a:["BIG GORZÓW","OBI","AGATA MEBLE"],c:0}
+];
+
+let i=0,score=0,lock=false;
+const app=document.getElementById("app");
+
+// ===== TIMER =====
+let time=QUIZ_TIME;
+const timer=document.createElement("div");
+timer.className="timer";
+app.appendChild(timer);
+
+const tick=setInterval(()=>{
+  time--;
+  timer.textContent=`⏱ ${time}s`;
+  if(time<=15) timer.classList.add("danger");
+  if(time<=0){clearInterval(tick);fail();}
+},1000);
+
+// ===== RENDER =====
+function render(){
+ lock=false;
+ const q=quiz[i];
+ app.innerHTML="<h1>OSTATNIA NOC 🥷</h1>";
+ app.appendChild(timer);
+ app.innerHTML+=`<h3>${i+1}. ${q.q}</h3>`;
+ q.a.forEach((x,idx)=>{
+   const b=document.createElement("button");
+   b.textContent=x;
+   b.onclick=()=>answer(idx);
+   app.appendChild(b);
+ });
+}
+function answer(n){
+ if(lock) return;
+ lock=true;
+ const btns=[...document.querySelectorAll("button")];
+ btns.forEach(b=>b.disabled=true);
+ if(n===quiz[i].c){btns[n].classList.add("correct");score++;}
+ else{btns[n].classList.add("wrong");btns[quiz[i].c].classList.add("correct");}
+ setTimeout(()=>{i++; i<quiz.length?render():finish();},800);
+}
+
+// ===== KONIEC =====
+function finish(){
+ clearInterval(tick);
+ app.innerHTML="";
+ if(score===quiz.length){
+  localStorage.setItem("banned","1");
+  const link=atob("aHR0cHM6Ly90Lm1lLytMN3QtdS1xUUFTNVV6TXpnMA==");
+  app.innerHTML=
+   "<h2>GRATULACJE 🥷🎉</h2>" +
+   "<p>PRZECHODZISZ DALEJ DO OSTATNIEJ NOCY</p>" +
+   `<a href="${link}" target="_blank"><button>WEJDŹ</button></a>`;
+ }else{
+  app.innerHTML="<h2>SŁABO, SŁABO 😏</h2><p>SPRÓBUJ JESZCZE RAZ</p>";
+ }
+}
+function fail(){
+ localStorage.setItem("banned","1");
+ app.innerHTML="<h1>⏱ CZAS MINĄŁ</h1><p>KONIEC GRY</p>";
+}
+
+render();
+</script>
+</body>
+</html>
