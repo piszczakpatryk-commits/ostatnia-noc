@@ -85,13 +85,11 @@ button:hover {
 
 <div class="box">
 
-<!-- PO DACIE -->
 <div id="expired" class="hidden">
   <h1>OSTATNIA NOC</h1>
   <p>Quiz zakończony</p>
 </div>
 
-<!-- HASŁO -->
 <div id="login">
   <h1>OSTATNIA NOC</h1>
   <p>Wpisz hasło</p>
@@ -99,14 +97,12 @@ button:hover {
   <p id="passInfo"></p>
 </div>
 
-<!-- QUIZ -->
 <div id="quiz" class="hidden">
   <div class="timer" id="timer">05:00</div>
   <div id="question"></div>
   <div id="answers"></div>
 </div>
 
-<!-- WYNIK -->
 <div id="result" class="hidden"></div>
 
 </div>
@@ -118,7 +114,7 @@ if (new Date() >= new Date("2026-01-25T00:00:00")) {
   expired.style.display = "block";
 }
 
-// ===== LIMIT PODEJŚĆ =====
+// ===== LIMIT PODEJŚĆ (3 PRÓBY) =====
 let attempts = Number(localStorage.getItem("attempts") || 0);
 if (attempts >= 3) {
   login.innerHTML = "<p>DOSTĘP ZABLOKOWANY</p>";
@@ -140,7 +136,7 @@ const questions = [
   {q:"1/4 PRZY JAKIEJ FIRMIE?", a:["TPV","YETICO","FAURECIA"], c:1},
   {q:"GDZIE NAGRYWANO TELEDYSK DO NUTY STREETA?", a:["TRZEBISZEWO","SKWIERZYNA","GORZÓW"], c:0},
   {q:"NALOT POLICJI NA HALLOWEEN", a:["AGATA MEBLE","BIG GORZÓW","S1"], c:2},
-  {q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?", a:["STRZELCE KRAJEŃSKIE","TRZEBISZEWO","KOSTRZYN NAD ODRĄ"], c:2},
+  {q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?", a:["STRZELCE KRAJEŃSKIE","TRZEBISZEWO","KOSTRZYN NAD ODRĄ"], c:1},
   {q:"NO PIRO NO FUN ?", a:["TAK","NIE"], c:0},
   {q:"STREET MEET BASS WALI W CHUJ…", a:["NAS NIE DOGONISZ JUŻ","KAŻDY CO STOI TU","PSY WPADAJĄ ZAWIJAMY"], c:0},
   {q:"ILE OSÓB JEST NA KANALE NADAWCZYM?", a:["1500","2100","3000"], c:1},
@@ -148,13 +144,12 @@ const questions = [
   {q:"NAJWIĘKSZY SPOT GDZIE ?", a:["BIG GORZÓW","AGATA MEBLE","STRZELCE KRAJEŃSKIE"], c:0}
 ];
 
-// LOSOWANIE PYTAŃ
 questions.sort(() => Math.random() - 0.5);
 
 let index = 0;
 let score = 0;
 
-// ===== TIMER 5 MIN =====
+// ===== TIMER =====
 let time = 300;
 let interval;
 function startTimer() {
@@ -209,14 +204,15 @@ function endQuiz() {
   quiz.style.display = "none";
   result.classList.remove("hidden");
 
-  if (score === questions.length) {
-    const link = atob("https://t.me/+oh41Af-zqCw4OTRk);
+  if (score >= questions.length - 1) {
     result.innerHTML = `
       <h1>OSTATNIA NOC 🏆</h1>
       <p style="color:#00ff88">
         GRATULACJE 🥷🎉<br>PRZECHODZISZ DALEJ
       </p>
-      <a class="link" href="${link}" target="_blank">${link}</a>
+      <a class="link" href="https://t.me/+oh41Af-zqCw4OTRk" target="_blank">
+        ODBIERZ LINK
+      </a>
       <div class="footer">STREET MEET</div>
     `;
   } else {
