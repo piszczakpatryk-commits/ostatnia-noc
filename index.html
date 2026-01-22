@@ -2,204 +2,156 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<title>OSTATNIA NOC</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OSTATNIA NOC 🥷</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:'Rubik Mono One',sans-serif;
-  background:url("tlo.png") center/cover no-repeat fixed;
-  min-height:100vh;
-  color:#fff;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
-.overlay{
-  min-height:100vh;
-  background:rgba(0,0,0,.85);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:15px;
+
+.hidden {
+  display: none;
 }
-.box{
-  width:100%;
-  max-width:760px;
-  background:#000;
-  border-radius:18px;
-  padding:22px;
-  box-shadow:0 0 50px #000;
+
+.box {
+  background: rgba(0,0,0,0.85);
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 20px #000;
 }
-h1{text-align:center;letter-spacing:3px}
-.timer{text-align:center;color:#ff2b2b;margin:10px 0;font-size:20px}
-.question{margin:15px 0;font-size:18px}
-.answers button{
-  width:100%;padding:14px;margin:6px 0;
-  background:#111;border:2px solid #444;color:#fff;
-  border-radius:10px;font-size:15px;
+
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
 }
-.answers button:hover{background:#ff2b2b}
-input{width:100%;padding:12px;font-size:16px;text-align:center;border-radius:8px;border:none;margin-top:10px}
-.hidden{display:none}
-.flash-good{animation:good .3s}
-.flash-bad{animation:bad .4s}
-@keyframes good{0%{background:#0f0}100%{background:#000}}
-@keyframes bad{
-  0%{background:#f00;transform:translateX(-5px)}
-  50%{transform:translateX(5px)}
-  100%{background:#000;transform:none}
+
+button {
+  background: #1db954;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
 }
-.confetti{
-  position:fixed;width:10px;height:10px;top:-10px;
-  animation:fall 3s linear infinite;
+
+button:hover {
+  background: #1ed760;
 }
-@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
-a{color:#00ffcc}
+
+.question {
+  margin-bottom: 15px;
+}
+
+.logo-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-container img {
+  width: 350px;
+  max-width: 90%;
+  height: auto;
+}
+
+small {
+  opacity: 0.6;
+}
 </style>
 </head>
 
 <body>
-<div class="overlay">
-<div class="box">
 
-<h1>OSTATNIA NOC 🥷</h1>
-
-<div id="lock">
-PODAJ HASŁO
-<input id="pwd" placeholder="HASŁO">
-<button onclick="checkPass()">ENTER</button>
+<div id="dateBlock" class="box hidden">
+  <h2>⛔ Quiz niedostępny</h2>
+  <p>Dostępny tylko<br><b>22–24 stycznia</b></p>
 </div>
 
-<div id="game" class="hidden">
-  <div id="timer" class="timer">03:00</div>
-  <div id="quiz"></div>
+<div id="loginBox" class="box hidden">
+  <h2>🔐 PODAJ HASŁO</h2>
+  <input type="password" id="password" placeholder="Hasło">
+  <small>Wejście automatyczne</small>
 </div>
 
-<div id="result" class="hidden"></div>
+<div id="quizBox" class="box hidden">
+  <h2>OSTATNIA NOC</h2>
 
-</div>
+  <div class="question">
+    <p>5. GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?</p>
+    <button onclick="answer(true)">Trzebiszewo</button>
+    <button onclick="answer(false)">Kostrzyn nad Odrą</button>
+    <button onclick="answer(false)">Strzelce Krajeńskie</button>
+  </div>
+
+  <div id="result" class="hidden">
+    <h3>🎉 GRATULACJE 🎉</h3>
+    <p>
+      <a href="https://t.me/+%2B7-u-QAS5UzMzQ0" target="_blank" style="color:#1db954;">
+        👉 PRZEJDŹ DALEJ
+      </a>
+    </p>
+
+    <div class="logo-container">
+      <img src="tlo.png" alt="STREET MEET">
+    </div>
+  </div>
 </div>
 
-<audio id="good" src="good.mp3"></audio>
-<audio id="bad" src="bad.mp3"></audio>
+<!-- DŹWIĘKI -->
+<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-click-1114.mp3"></audio>
+<audio id="successSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
 
 <script>
-// ====== OKNO CZASOWE ======
-const START = new Date("2026-01-22T00:00:00");
-const END   = new Date("2026-01-25T00:00:00");
-const NOW   = new Date();
+const PASSWORD = "noc";
+const startDate = new Date("2026-01-22");
+const endDate = new Date("2026-01-25");
+const now = new Date();
 
-if(NOW < START || NOW >= END){
-  document.body.innerHTML =
-  "<h1 style='color:red;text-align:center;margin-top:40vh'>QUIZ ZAKOŃCZONY</h1>";
+const dateBlock = document.getElementById("dateBlock");
+const loginBox = document.getElementById("loginBox");
+const quizBox = document.getElementById("quizBox");
+const result = document.getElementById("result");
+
+const clickSound = document.getElementById("clickSound");
+const successSound = document.getElementById("successSound");
+
+if (now < startDate || now >= endDate) {
+  dateBlock.classList.remove("hidden");
+} else {
+  loginBox.classList.remove("hidden");
 }
 
-// ====== HASŁO ======
-const PASSWORD = "OSTATNIANOC";
-
-// ====== PYTANIA ======
-let questions=[
-{q:"KIEDY POWSTAŁ STREET MEET?",a:["2025","2023","2021"],c:1},
-{q:"1/4 PRZY JAKIEJ FIRMIE?",a:["TPV","YETICO","FAURECIA"],c:1},
-{q:"GDZIE NAGRYWANO TELEDYSK DO NUTY STREETA?",a:["TRZEBISZEWO","SKWIERZYNA","GORZÓW"],c:0},
-{q:"NALOT POLICJI NA HALLOWEEN",a:["AGATA","BIG","S1"],c:2},
-{q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?",a:["STRZELCE","TRZEBISZEWO","KOSTRZYN"],c:1},
-{q:"NO PIRO NO FUN?",a:["TAK","NIE"],c:0},
-{q:"STREET MEET BASS WALI W CHUJ…",a:["NAS NIE DOGONISZ","KAŻDY CO STOI","PSY WPADAJĄ"],c:0},
-{q:"ILE OSÓB NA KANALE?",a:["1500","2100","3000"],c:1},
-{q:"ZBIÓRKI DLA?",a:["PIESKÓW","DZIECI","POTRZEBUJĄCYCH"],c:0},
-{q:"NAJWIĘKSZY SPOT GDZIE?",a:["BIG","OBI","AGATA"],c:0}
-];
-
-questions.sort(()=>Math.random()-0.5);
-
-let q=0,score=0,time=180;
-let attempts=localStorage.getItem("attempts")||0;
-const link=atob("aHR0cHM6Ly90Lm1lLyslMkI3LXUtcVFBUzVVek16ZzA=");
-
-// ====== HASŁO ======
-function checkPass(){
-  if(pwd.value===PASSWORD){
-    lock.classList.add("hidden");
-    game.classList.remove("hidden");
-    show();
-    runTimer();
-  }
-}
-
-// ====== QUIZ ======
-function show(){
-  if(q>=questions.length){end();return;}
-  let qu=questions[q];
-  quiz.innerHTML=`<div class="question">${qu.q}</div>
-  <div class="answers">${
-    qu.a.map((x,i)=>`<button onclick="ans(${i})">${x}</button>`).join("")
-  }</div>`;
-}
-
-function ans(i){
-  if(i===questions[q].c){
-    score++; good.play(); document.body.classList.add("flash-good");
-  }else{
-    bad.play(); document.body.classList.add("flash-bad");
-  }
-  setTimeout(()=>document.body.className="",300);
-  q++; show();
-}
-
-function end(){
-  localStorage.setItem("attempts",++attempts);
-  game.classList.add("hidden");
-  result.classList.remove("hidden");
-
-  if(score===questions.length){
-    confetti();
-    result.innerHTML=`🎉 GRATULACJE 🥷<br><a href="${link}" target="_blank">${link}</a>`;
-  }else{
-    result.innerHTML="❌ SŁABO, SŁABO SPRÓBUJ JESZCZE RAZ 😏";
-  }
-}
-
-// ====== TIMER ======
-function runTimer(){
-  setInterval(()=>{
-    time--;
-    timer.textContent=
-    `${String(Math.floor(time/60)).padStart(2,'0')}:${String(time%60).padStart(2,'0')}`;
-    if(time<=0)end();
-  },1000);
-}
-
-// ====== CONFETTI ======
-function confetti(){
-  for(let i=0;i<120;i++){
-    let c=document.createElement("div");
-    c.className="confetti";
-    c.style.left=Math.random()*100+"vw";
-    c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-    c.style.animationDuration=2+Math.random()*3+"s";
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),5000);
-  }
-}
-
-// ====== BLOKADA COFANIA ======
-history.pushState(null,null,location.href);
-onpopstate=()=>history.go(1);
-
-// ====== ADMIN RESET ======
-document.addEventListener("keydown",e=>{
-  if(e.shiftKey&&e.key==="A"){
-    window.addEventListener("keydown",x=>{
-      if(x.key==="D"){
-        localStorage.clear();
-        location.reload();
-      }
-    },{once:true});
+document.getElementById("password").addEventListener("input", e => {
+  if (e.target.value === PASSWORD) {
+    clickSound.play();
+    loginBox.classList.add("hidden");
+    quizBox.classList.remove("hidden");
   }
 });
+
+function answer(correct) {
+  clickSound.play();
+  if (correct) {
+    successSound.play();
+    result.classList.remove("hidden");
+  } else {
+    alert("❌ Zła odpowiedź");
+  }
+}
 </script>
+
 </body>
 </html>
