@@ -11,10 +11,10 @@ body {
   font-family: Arial, sans-serif;
   background: #000;
   color: #fff;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
 
 .hidden {
@@ -31,16 +31,23 @@ body {
   box-shadow: 0 0 20px #000;
 }
 
-input, button {
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+  margin-top: 15px;
+}
+
+button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
   font-size: 16px;
   border-radius: 8px;
   border: none;
-}
-
-button {
   background: #1db954;
   color: #000;
   font-weight: bold;
@@ -51,106 +58,67 @@ button:hover {
   background: #1ed760;
 }
 
-.question {
-  margin-bottom: 15px;
-}
-
-.logo-container {
+.logo {
   margin-top: 30px;
-  display: flex;
-  justify-content: center;
 }
 
-.logo-container img {
-  width: 350px;
+.logo img {
   max-width: 90%;
+  width: 350px;
   height: auto;
-}
-
-small {
-  opacity: 0.6;
 }
 </style>
 </head>
 
 <body>
 
-<div id="dateBlock" class="box hidden">
-  <h2>⛔ Quiz niedostępny</h2>
-  <p>Dostępny tylko<br><b>22–24 stycznia</b></p>
+<div id="dateBox" class="box hidden">
+  <h2>⛔ QUIZ ZAKOŃCZONY</h2>
+  <p>Dostępny był tylko<br><b>22–24 stycznia</b></p>
 </div>
 
 <div id="loginBox" class="box hidden">
   <h2>🔐 PODAJ HASŁO</h2>
   <input type="password" id="password" placeholder="Hasło">
-  <small>Wejście automatyczne</small>
 </div>
 
 <div id="quizBox" class="box hidden">
-  <h2>OSTATNIA NOC</h2>
+  <h2>OSTATNIA NOC 🥷</h2>
 
-  <div class="question">
-    <p>5. GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?</p>
-    <button onclick="answer(true)">Trzebiszewo</button>
-    <button onclick="answer(false)">Kostrzyn nad Odrą</button>
-    <button onclick="answer(false)">Strzelce Krajeńskie</button>
-  </div>
+  <p><b>GRATULACJE</b><br>PRZECHODZISZ DALEJ</p>
 
-  <div id="result" class="hidden">
-    <h3>🎉 GRATULACJE 🎉</h3>
-    <p>
-      <a href="https://t.me/+%2B7-u-QAS5UzMzQ0" target="_blank" style="color:#1db954;">
-        👉 PRZEJDŹ DALEJ
-      </a>
-    </p>
+  <a href="https://t.me/+l7-u-qQAS5UzMzg0" target="_blank" style="color:#1db954;">
+    👉 LINK DO GRUPY
+  </a>
 
-    <div class="logo-container">
-      <img src="tlo.png" alt="STREET MEET">
-    </div>
+  <div class="logo">
+    <img src="tlo.png" alt="STREET MEET">
   </div>
 </div>
 
-<!-- DŹWIĘKI -->
-<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-click-1114.mp3"></audio>
-<audio id="successSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
-
 <script>
-const PASSWORD = "noc";
-const startDate = new Date("2026-01-22");
-const endDate = new Date("2026-01-25");
+const PASSWORD = "noc"; // ← TU ZMIENIASZ HASŁO
+
+const startDate = new Date("2026-01-22T00:00:00");
+const endDate   = new Date("2026-01-25T00:00:00");
 const now = new Date();
 
-const dateBlock = document.getElementById("dateBlock");
+const dateBox  = document.getElementById("dateBox");
 const loginBox = document.getElementById("loginBox");
-const quizBox = document.getElementById("quizBox");
-const result = document.getElementById("result");
-
-const clickSound = document.getElementById("clickSound");
-const successSound = document.getElementById("successSound");
+const quizBox  = document.getElementById("quizBox");
 
 if (now < startDate || now >= endDate) {
-  dateBlock.classList.remove("hidden");
+  dateBox.classList.remove("hidden");
 } else {
   loginBox.classList.remove("hidden");
 }
 
 document.getElementById("password").addEventListener("input", e => {
   if (e.target.value === PASSWORD) {
-    clickSound.play();
     loginBox.classList.add("hidden");
     quizBox.classList.remove("hidden");
   }
 });
-
-function answer(correct) {
-  clickSound.play();
-  if (correct) {
-    successSound.play();
-    result.classList.remove("hidden");
-  } else {
-    alert("❌ Zła odpowiedź");
-  }
-}
 </script>
 
 </body>
