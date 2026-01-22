@@ -25,16 +25,14 @@ body {
   max-width: 520px;
   padding: 25px;
   background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255,255,255,0.12);
   text-align: center;
 }
 
 .hidden { display: none; }
 
-h1 {
-  letter-spacing: 5px;
-}
+h1 { letter-spacing: 5px; }
 
 input {
   width: 100%;
@@ -66,8 +64,8 @@ button:hover {
   margin-bottom: 15px;
 }
 
-.flash-good { background: rgba(0,80,0,0.9) !important; }
-.flash-bad  { background: rgba(80,0,0,0.9) !important; }
+.flash-good { background: rgba(0,90,0,0.85) !important; }
+.flash-bad  { background: rgba(90,0,0,0.85) !important; }
 
 .link {
   color: #00ff88;
@@ -97,7 +95,7 @@ button:hover {
 <div id="login">
   <h1>OSTATNIA NOC</h1>
   <p>Wpisz hasło</p>
-  <input id="pass" placeholder="ostatnianoc">
+  <input id="pass" type="password" placeholder="hasło">
   <p id="passInfo"></p>
 </div>
 
@@ -114,16 +112,14 @@ button:hover {
 </div>
 
 <script>
-// ===== DATA WYŁĄCZENIA =====
+// ===== DATA WYGAŚNIĘCIA =====
 if (new Date() >= new Date("2026-01-25T00:00:00")) {
   login.style.display = "none";
   expired.style.display = "block";
 }
 
-// ===== BLOKADA PODEJŚĆ =====
-let attempts = localStorage.getItem("attempts") || 0;
-attempts = Number(attempts);
-
+// ===== LIMIT PODEJŚĆ =====
+let attempts = Number(localStorage.getItem("attempts") || 0);
 if (attempts >= 2) {
   login.innerHTML = "<p>DOSTĘP ZABLOKOWANY</p>";
 }
@@ -134,7 +130,7 @@ pass.addEventListener("input", () => {
     login.style.display = "none";
     quiz.classList.remove("hidden");
     startTimer();
-    showQuestion();
+    startQuiz();
   }
 });
 
@@ -143,23 +139,26 @@ const questions = [
   {q:"KIEDY POWSTAŁ STREET MEET?", a:["2025","2023","2021"], c:1},
   {q:"1/4 PRZY JAKIEJ FIRMIE?", a:["TPV","YETICO","FAURECIA"], c:1},
   {q:"GDZIE NAGRYWANO TELEDYSK DO NUTY STREETA?", a:["TRZEBISZEWO","SKWIERZYNA","GORZÓW"], c:0},
-  {q:"NALOT POLICJI NA HALLOWEEN", a:["AGATA","BIG","S1"], c:2},
-  {q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?", a:["STRZELCE","TRZEBISZEWO","KOSTRZYN"], c:1},
-  {q:"NO PIRO NO FUN?", a:["TAK","NIE"], c:0},
-  {q:"STREET MEET BASS WALI W CHUJ…", a:["NAS NIE DOGONISZ","KAŻDY CO STOI","PSY WPADAJĄ"], c:0},
-  {q:"ILE OSÓB NA KANALE?", a:["1500","2100","3000"], c:1},
-  {q:"ZBIÓRKI DLA?", a:["PIESKÓW","DZIECI","POTRZEBUJĄCYCH"], c:0},
-  {q:"NAJWIĘKSZY SPOT GDZIE?", a:["BIG","OBI","AGATA"], c:0}
+  {q:"NALOT POLICJI NA HALLOWEEN", a:["AGATA MEBLE","BIG GORZÓW","S1"], c:2},
+  {q:"GDZIE NAGRYWANA OSTATNIA ROLKA ZE SPOTA ILLEGAL?", a:["STRZELCE KRAJEŃSKIE","TRZEBISZEWO","KOSTRZYN NAD ODRĄ"], c:1},
+  {q:"NO PIRO NO FUN ?", a:["TAK","NIE"], c:0},
+  {q:"STREET MEET BASS WALI W CHUJ…", a:["NAS NIE DOGONISZ JUŻ","KAŻDY CO STOI TU","PSY WPADAJĄ ZAWIJAMY"], c:0},
+  {q:"ILE OSÓB JEST NA KANALE NADAWCZYM?", a:["1500","2100","3000"], c:1},
+  {q:"ZBIÓRKI DLA ?", a:["PIESKÓW","DOMU DZIECKA","DLA POTRZEBUJĄCYCH"], c:0},
+  {q:"NAJWIĘKSZY SPOT GDZIE ?", a:["BIG GORZÓW","AGATA MEBLE","STRZELCE KRAJEŃSKIE"], c:0}
 ];
+
+// LOSOWANIE PYTAŃ
+questions.sort(() => Math.random() - 0.5);
 
 let index = 0;
 let score = 0;
 
 // ===== TIMER 5 MIN =====
 let time = 300;
-let timerInt;
+let interval;
 function startTimer() {
-  timerInt = setInterval(() => {
+  interval = setInterval(() => {
     time--;
     const m = String(Math.floor(time/60)).padStart(2,"0");
     const s = String(time%60).padStart(2,"0");
@@ -169,6 +168,10 @@ function startTimer() {
 }
 
 // ===== QUIZ =====
+function startQuiz() {
+  showQuestion();
+}
+
 function showQuestion() {
   if (index >= questions.length) return endQuiz();
 
@@ -176,10 +179,12 @@ function showQuestion() {
   question.innerHTML = `<h3>${q.q}</h3>`;
   answers.innerHTML = "";
 
-  q.a.forEach((txt,i)=>{
+  const mixed = q.a.map((t,i)=>({t,i})).sort(()=>Math.random()-0.5);
+
+  mixed.forEach(o=>{
     const b = document.createElement("button");
-    b.innerText = txt;
-    b.onclick = ()=>answer(i);
+    b.innerText = o.t;
+    b.onclick = ()=>answer(o.i);
     answers.appendChild(b);
   });
 }
@@ -198,8 +203,8 @@ function answer(i) {
 
 // ===== KONIEC =====
 function endQuiz() {
-  clearInterval(timerInt);
-  localStorage.setItem("attempts", attempts+1);
+  clearInterval(interval);
+  localStorage.setItem("attempts", attempts + 1);
 
   quiz.style.display = "none";
   result.classList.remove("hidden");
@@ -207,8 +212,10 @@ function endQuiz() {
   if (score === questions.length) {
     const link = atob("aHR0cHM6Ly90Lm1lLyslMkI3LXUtcVFBUzVVek16ZzA=");
     result.innerHTML = `
-      <h1>OSTATNIA NOC</h1>
-      <p style="color:#00ff88">GRATULACJE<br>PRZECHODZISZ DALEJ</p>
+      <h1>OSTATNIA NOC 🏆</h1>
+      <p style="color:#00ff88">
+        GRATULACJE 🥷🎉<br>PRZECHODZISZ DALEJ
+      </p>
       <a class="link" href="${link}" target="_blank">${link}</a>
       <div class="footer">STREET MEET</div>
     `;
