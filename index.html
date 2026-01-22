@@ -3,122 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <title>OSTATNIA NOC</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #000;
-  color: #fff;
   min-height: 100vh;
+  background: radial-gradient(circle at top, #111 0%, #000 70%);
+  color: #eee;
+  font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.hidden {
-  display: none;
-}
-
 .box {
-  background: rgba(0,0,0,0.85);
-  padding: 25px;
-  border-radius: 12px;
   max-width: 420px;
   width: 100%;
+  padding: 25px;
   text-align: center;
-  box-shadow: 0 0 20px #000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 8px;
-  border: none;
-  text-align: center;
-  margin-top: 15px;
+.hidden { display: none; }
+
+h1 {
+  letter-spacing: 6px;
 }
 
-button {
+input, button {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  background: #000;
+  border: 1px solid #333;
+  color: #fff;
   font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: #1db954;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
 }
 
 button:hover {
-  background: #1ed760;
+  border-color: #00ff88;
+  color: #00ff88;
+  cursor: pointer;
 }
 
-.logo {
-  margin-top: 30px;
+.timer {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #00ff88;
 }
 
-.logo img {
-  max-width: 90%;
-  width: 350px;
-  height: auto;
+.footer {
+  margin-top: 40px;
+  font-size: 34px;
+  opacity: 0.85;
+  letter-spacing: 3px;
+}
+
+.link {
+  color: #00ff88;
+  font-weight: bold;
+  text-decoration: none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="dateBox" class="box hidden">
-  <h2>⛔ QUIZ ZAKOŃCZONY</h2>
-  <p>Dostępny był tylko<br><b>22–24 stycznia</b></p>
+<div class="box">
+
+<!-- PO TERMINIE -->
+<div id="expired" class="hidden">
+  <h1>OSTATNIA NOC</h1>
+  <p>Quiz zakończony</p>
 </div>
 
-<div id="loginBox" class="box hidden">
-  <h2>🔐 PODAJ HASŁO</h2>
-  <input type="password" id="password" placeholder="Hasło">
+<!-- HASŁO -->
+<div id="login">
+  <h1>OSTATNIA NOC</h1>
+  <p>Wpisz hasło</p>
+  <input id="pass" placeholder="hasło">
+  <p id="passError"></p>
 </div>
 
-<div id="quizBox" class="box hidden">
-  <h2>OSTATNIA NOC 🥷</h2>
+<!-- QUIZ -->
+<div id="quiz" class="hidden">
+  <h1>QUIZ</h1>
+  <div class="timer" id="timer">05:00</div>
 
-  <p><b>GRATULACJE</b><br>PRZECHODZISZ DALEJ</p>
+  <p>1. Gdzie nagrywana była ostatnia rolka?</p>
+  <button onclick="good()">Trzebiszewo</button>
+  <button onclick="bad()">Kostrzyn nad Odrą</button>
+  <button onclick="bad()">Strzelce Krajeńskie</button>
+</div>
 
-  <a href="https://t.me/+l7-u-qQAS5UzMzg0" target="_blank" style="color:#1db954;">
-    👉 LINK DO GRUPY
-  </a>
+<!-- WYGRANA -->
+<div id="win" class="hidden">
+  <h1>OSTATNIA NOC</h1>
+  <p style="color:#00ff88">GRATULACJE<br>PRZECHODZISZ DALEJ</p>
 
-  <div class="logo">
-    <img src="tlo.png" alt="STREET MEET">
-  </div>
+  <p>
+    👉 <a class="link" href="https://t.me/+x2B7-U-QAS5UZMzg0" target="_blank">
+      LINK DO GRUPY
+    </a>
+  </p>
+
+  <div class="footer">STREET MEET</div>
+</div>
+
 </div>
 
 <script>
-const PASSWORD = "noc"; // ← TU ZMIENIASZ HASŁO
-
-const startDate = new Date("2026-01-22T00:00:00");
-const endDate   = new Date("2026-01-25T00:00:00");
-const now = new Date();
-
-const dateBox  = document.getElementById("dateBox");
-const loginBox = document.getElementById("loginBox");
-const quizBox  = document.getElementById("quizBox");
-
-if (now < startDate || now >= endDate) {
-  dateBox.classList.remove("hidden");
-} else {
-  loginBox.classList.remove("hidden");
+// DATA WYGAŚNIĘCIA
+const endDate = new Date("2026-01-25T00:00:00");
+if (new Date() >= endDate) {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("expired").style.display = "block";
 }
 
-document.getElementById("password").addEventListener("input", e => {
-  if (e.target.value === PASSWORD) {
-    loginBox.classList.add("hidden");
-    quizBox.classList.remove("hidden");
+// BLOKADA HASŁA
+let attempts = 0;
+const input = document.getElementById("pass");
+
+input.addEventListener("input", () => {
+  if (input.value.trim().toLowerCase() === "ostatnia noc") {
+    startQuiz();
   }
 });
+
+function startQuiz() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+  startTimer();
+}
+
+input.addEventListener("change", () => {
+  if (input.value.trim().toLowerCase() !== "ostatnia noc") {
+    attempts++;
+    document.getElementById("passError").innerText =
+      "Błędne hasło (" + attempts + "/2)";
+    input.value = "";
+
+    if (attempts >= 2) {
+      document.getElementById("login").innerHTML =
+        "<p>Dostęp zablokowany</p>";
+    }
+  }
+});
+
+// TIMER 5 MIN
+let time = 300;
+let interval;
+
+function startTimer() {
+  interval = setInterval(() => {
+    time--;
+    const m = String(Math.floor(time / 60)).padStart(2, "0");
+    const s = String(time % 60).padStart(2, "0");
+    document.getElementById("timer").innerText = `${m}:${s}`;
+
+    if (time <= 0) {
+      clearInterval(interval);
+      document.getElementById("quiz").innerHTML =
+        "<p>Czas minął</p>";
+    }
+  }, 1000);
+}
+
+function good() {
+  clearInterval(interval);
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("win").style.display = "block";
+}
+
+function bad() {
+  alert("Zła odpowiedź");
+}
 </script>
 
 </body>
